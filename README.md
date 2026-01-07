@@ -34,7 +34,7 @@ Currently MongoDB (NoSQL) to host transaction records?
 
 ## Development
 
-Requires python 3.12+
+Requires python 3.12
 python -m pip install -r requirements.txt
 
 I also intend to provide a minimal CLI tooling for those wishing to use the tool locally. (Incomplete)
