@@ -2,3 +2,5 @@
 
 
 
+class DocxTool:
+    """ Tool for creating and fillout out .dox documents"""
