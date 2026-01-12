@@ -1,5 +1,3 @@
 
-# Ignore Tests and 
-
-src/tests/
-src/frontend/
+# Ignore Tests in container image
+src/app/tests/
