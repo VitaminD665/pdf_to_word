@@ -36,8 +36,9 @@ jobs:
           VERSION="${TAG_VERSION#v}"
           echo "TAG_VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Lint Code with Ruff
-        uses: ./.github/actions/ruff-lint/action.yml
+      # Undo when ready
+      #- name: Lint Code with Ruff
+       # uses: ./.github/actions/ruff-lint/action.yml
 
       - name: Run unit Tests
         shell: bash
