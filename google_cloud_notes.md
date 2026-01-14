@@ -84,11 +84,20 @@ spec:
   template:
     spec:
       containers:
-        - image: <LOCATION>-docker.pkg.dev/<GCP_PROJECT_NAME>/<REGISTRY_NAME>/<REGISTRY_NAME>:latest
+        - image: <LOCATION>-docker.pkg.dev/<GCP_PROJECT_NAME>/<REGISTRY_NAME>/<CONTAINER_NAME>:latest
           env:
           ports:
             - containerPort: 4000
 ```
+
+Then run 
+```bash
+gcloud run services replace service.yaml --region northamerica-northeast1
+```
+
+
+
+
 
 The following will instatiate a service from a pushed image: _IMAGE_ from the artifact registry. Where the 'service' rules is dictated in our 
 `services.yaml` file. This will 'spin-up' our production container and the like. 
@@ -110,11 +119,11 @@ bindins:
 Now, once again:
 
 ```bash
-gcloud run services set-iam-policy <NAME> --region <DEPLOYMENT_REGION>
+gcloud run services set-iam-policy <SERICE_NAME> <POLICY_FILE> --region <DEPLOYMENT_REGION>
 ```
 
-fFo the identity authentication policy (IAM), if you are confused, don't worry. We wil simply set an authentication in our CI for a 
-GCP 'Service Account '
+For the identity authentication policy (IAM), if you are confused, don't worry. We wil simply set an authentication in our CI for a 
+GCP 'Service Account '. Where 'SERVICE_NAME' is 'document-ocr-service' and POLICY_FILE is 'gcr-service-policy.yaml'
 
 #### GCP Service Account
 
@@ -129,6 +138,11 @@ Once created navigate to `KEYS` and create a new key wit h'add key'. This will o
 
 
 ## Creating the GitHub Actions Workflows 
+
+Ran jobs are dictated in `.github/workflows/<WORKFLOW>.yml` files.
+
+Reusable composite actions are found in the `.github/actions/<ACTION>/action.yml`.
+
 
 
 
