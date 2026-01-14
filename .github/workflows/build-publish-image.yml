@@ -57,7 +57,7 @@ jobs:
       - name: Configure Docker Authentication
         shell: bash 
         run: |
-          gcloud auth configure-docker ${env.REGION_ID}-docker.pkg.dev
+          gcloud auth configure-docker ${REGION_ID}-docker.pkg.dev
 
       - name: Build and Push Docker Image
         shell: bash
