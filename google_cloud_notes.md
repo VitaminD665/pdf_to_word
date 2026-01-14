@@ -153,5 +153,16 @@ gcloud projects add-iam-policy-binding document-ocr-480202 \
 ```
 
 
+We also require a few more permission sets:
+
+```bash
+gcloud services enable cloudresourcemanager.googleapis.com --project document-ocr-480202
+```
+
+```bash
+gcloud services enable artifactregistry.googleapis.com run.googleapis.com --project document-ocr-480202
+```
+
+
 
 

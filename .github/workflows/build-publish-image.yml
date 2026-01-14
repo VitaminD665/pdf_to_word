@@ -59,7 +59,7 @@ jobs:
         run: |
           gcloud auth configure-docker ${{ env.REGION_ID }}-docker.pkg.dev
 
-      - name: GCloud Debug Step
+      - name: gcloud Debug Step
         shell: bash
         run: |
           gcloud auth list 
