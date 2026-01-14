@@ -9,7 +9,7 @@ from src.app.utilities.ocr_tool import DocumentOCR
 from src.app.utilities.mongodb_atlas import MongoDBAccess
 
 
-# pseudo coding the main routine
+# pseudo coding the main routine hopefully
 
 
 def start_ocr_job():
