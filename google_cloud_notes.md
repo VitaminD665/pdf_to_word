@@ -143,8 +143,14 @@ Ran jobs are dictated in `.github/workflows/<WORKFLOW>.yml` files.
 
 Reusable composite actions are found in the `.github/actions/<ACTION>/action.yml`.
 
+Very possible you will run into authentication problems (as I have LOL). My error is with the 
+artifact registry and I must then, indicate te scope ofthe service account for the project. This can be found in the Google Cloud Developer Console
 
-
+```bash
+gcloud projects add-iam-policy-binding document-ocr-480202 \
+  --member="serviceAccount:<SERVICE_ACCOUNT_EMAIL>" \
+  --role="roles/artifactregistry.writer"
+```
 
 
 
