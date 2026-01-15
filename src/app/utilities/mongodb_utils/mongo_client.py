@@ -16,42 +16,59 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 
 
-
 class MongoDBCollections(StrEnum):
     JOBS = "jobs"
 
 
-# For local dev, store as env vars, then github secrets, then cloud run secrets for universal runtime
 @dataclass(frozen=True)
 class MongoConfig:
-    MONGO_URI = os.getenv("DOC_OCR_MONGO_ATLAS_URI", "")
-    MONGO_DB = os.getenv("MONGO_DB", "document_ocr-0")
+    uri: str
+    db_name: str = "app_events"
 
-    def __str__(self) -> str:
-        return "MongoConfig Vaild" if self is not None else "MongoConfig Invalid"
-    
-    def __repr__(self) -> str:
-        return self.__str__()
+    @staticmethod
+    def from_env() -> "MongoConfig":
+        uri = os.getenv("DOC_OCR_MONGO_ATLAS_URI")
+        if not uri:
+            raise RuntimeError("DOC_OCR_MONGO_ATLAS_URI not set")
 
-    def __post_init__(self):
-        if not self.MONGO_URI:
-            raise RuntimeError("MONGO URI Not Set, ensure connectivity to database")
-        
+        db_name = os.getenv("MONGO_DB", "app_events")
+        return MongoConfig(uri=uri, db_name=db_name)
 
-# Seen example using global keyword instead of classes, trying out
-_client: MongoClient | None = None
 
-def get_mongo_client() -> MongoClient:
-    global _client
-    if _client is None:
-        # TODO: Add the timeout ms and whatnot later on
-        _client = MongoClient(MongoConfig.MONGO_URI)
-    
-    return _client
-    
+class MongoStore:
+    """
+    Singleton for a shared MongoClient.
+    One MongoClient instance per process.
+    """
+    _client: MongoClient | None = None
+    _cfg: MongoConfig | None = None
+
+    def __init__(self) -> None:
+        raise RuntimeError(f"Do not instantiate {__class__.__name__}.")
+
+    @classmethod
+    def init(cls, cfg: MongoConfig | None = None) -> None:
+        cls._cfg = cfg or MongoConfig.from_env()
+
+    @classmethod
+    def client(cls) -> MongoClient:
+        if cls._cfg is None:
+            cls.init()
+
+        if cls._client is None:
+            assert cls._cfg is not None
+            cls._client = MongoClient(
+                cls._cfg.uri,
+                serverSelectionTimeoutMS=5000,
+            )
+        return cls._client
+
+    @classmethod
+    def collection(cls, name: MongoDBCollections) -> Collection:
+        assert cls._cfg is not None or cls.init() is None
+        cfg = cls._cfg
+        return cls.client()[cfg.db_name][name.value]
+
+
 def get_jobs_collection() -> Collection:
-    client = get_mongo_client()
-    return client[MongoConfig.MONGO_DB][MongoDBCollections.JOBS]
-
-
-
+    return MongoStore.collection(MongoDBCollections.JOBS)

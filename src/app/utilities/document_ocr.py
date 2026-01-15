@@ -25,7 +25,7 @@ class DocumentOCR:
 
     def __init__(self, args: OCRArguments = OCRArguments()) -> None:
         self.args = args
-        self.reader = easyocr.Reader(list(self.args.languages), gpu=self.args.gpu)
+        self.reader = easyocr.Reader(list(self.args.languages), is_gpu=self.args.gpu)
 
 
     def ocr_on_one_image(self, image_path: Path) -> list[dict[str, Any]]:

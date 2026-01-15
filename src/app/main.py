@@ -4,25 +4,40 @@
 import logging
 
 from pathlib import Path
+from uuid import uuid4
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse
 
+from src.app.utilities.app_logger import AppLogger
 from src.app.utilities.pdf_intake import PDFIntake
 from src.app.utilities.document_ocr import DocumentOCR, OCRArguments
 from src.app.utilities.omml_pass import MathPass
 from src.app.utilities.docx_tool import DocxTool
 
+from src.app.utilities.mongodb_utils.job_store_util import MongoJobStore
+from src.app.utilities.mongodb_utils.mongo_client import get_jobs_collection
+
 from src.app.main_workflow.job_status_enums import JobStatus, JobStep
 
 
 # TODO: What should be async and what should be sync?
+# TODO: Package and encapsulate all of these setup/init calls
 # Alwasy remember it works via HTTP protocol methods
 # This stuff all works in an 'event-loop'. I need to actually understand what this is however.
 # after any major changes, change gpu (like using a gpu on cloud compute)
+log = AppLogger()
 logging.basicConfig(level=logging.INFO)
+
+
 app = FastAPI()
+
+jobs_col = get_jobs_collection()
+job_store = MongoJobStore(jobs_col)
+job_store.ensure_indexes()
+
+
 pdf_intake = PDFIntake()
 math_pass = MathPass()
 docx_tool = DocxTool()
@@ -34,7 +49,6 @@ ocr_engine = DocumentOCR(
         paragraph=False,
     )
 )
-
 
 @app.get("/")
 def read_root():
