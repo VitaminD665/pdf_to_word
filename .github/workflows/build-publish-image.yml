@@ -83,4 +83,8 @@ jobs:
             --image ${{ env.DOCKER_IMAGE_URL }}:${{ env.TAG_VERSION }} \
             --platform managed \
             --region ${{ env.REGION_ID }} \
-            --allow-unauthenticated
+            --allow-unauthenticated \
+            --port 8080 \
+            --memory 1Gi \
+            --cpu 1 \
+            --timeout 300
