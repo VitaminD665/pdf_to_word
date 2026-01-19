@@ -2,7 +2,7 @@
 
 
 from dataclasses import dataclass
-from enum import Enum, auto, StrEnum
+from enum import StrEnum
 
 
 class JobStatus(StrEnum):

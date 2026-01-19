@@ -51,33 +51,42 @@ ocr_engine = DocumentOCR(
 )
 
 @app.get("/")
-def read_root():
+async def read_root():
     """ Root endpoint """
-
     return { "Root Enpoint": "Placeholder" }
 
 @app.get("/tool")
 def tool_endpoint():
     """ Tool endpoint """
-
     return { "Placholder: Tool "}
 
 
-
 @app.post("/v1/jobs")
-def start_job():
-    """ Create a Job doc and start the workflow"""
+async def start_job():
+    """ Create a Job doc and start the workflow, return the status, upload, and result urls"""
 
     # 1: Create a Job document in the mongo nosql databased
     # Include: settingsm time created, expired
+    job_id = str(uuid4())
+    await run_in_threadpool(job_store.create_job, job_id, {})
 
-    pass
+    result = {
+        "job_id": job_id,
+        "status_url":f"/v1/jobs/{job_id}",
+        "upload_url":f"/v1/jobs/{job_id}/file",
+        "result_url":f"/v1/jobs/{job_id}/result",
+    }
 
-
-
+    return result
 
 @app.post("/v1/jobs/{job_id}/file")
 async def job_handle_file(job_id: str, file: UploadFile = File(...)):
+    """ 
+    Main loop. Analyzes .pdf file, performs OCR, outputs DOCX
+    
+    
+    """
+    await run_in_threadpool(job_store.update_job, job_id, status=JobStatus.PROCESSING, step=JobStep.VALIDATE, progress=5)
     job_dir = Path("/tmp/jobs") / job_id
     pdf_path = await pdf_intake.validate_and_save_upload(file, job_dir)
 
@@ -86,17 +95,15 @@ async def job_handle_file(job_id: str, file: UploadFile = File(...)):
 
     ocr_result = await run_in_threadpool(ocr_engine.ocr_pages, image_paths)
 
-    # Math tagging pass (lightweight, but keep in threadpool for simplicity)
     ocr_tagged = await run_in_threadpool(math_pass.tag_blocks, ocr_result)
 
-    # Render docx (sync) -> threadpool
     out_docx = job_dir / "result.docx"
     await run_in_threadpool(docx_tool.render_document, ocr_tagged, out_docx)
 
     return {
         "job_id": job_id,
         "status": JobStatus.SUCCEEDED,
-        "step": JobStep.DOCX_RENDER,  # pick whatever enum name you have
+        "step": JobStep.RENDER_DOCX,
         "page_count": ocr_result["page_count"],
         "total_blocks": ocr_result["total_blocks"],
         "pdf_path": str(pdf_path),
@@ -105,13 +112,16 @@ async def job_handle_file(job_id: str, file: UploadFile = File(...)):
     }
 
 @app.get("/v1/jobs/{job_id}")
-def get_job_status():
+async def get_job_status(job_id: str):
     """ Get the information of a job and whatnot. """
 
     # 1. Simply return metadata information
     # Include: status, progress, step, error, fileName, createdAt, expiresAt
-    pass
+    document = await run_in_threadpool(job_store.get_job, job_id)
+    if not document:
+        raise HTTPException(status_code=404, detail="Job Not Found")
 
+    return document
 
 @app.get("/v1/jobs/{job_id}/result")
 def get_job_result(job_id: str):
@@ -126,8 +136,6 @@ def get_job_result(job_id: str):
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         filename=f"{job_id}.docx",
     )
-
-
 
 @app.get("/v1/smoke_test_backend")
 def smoke_test_container():
