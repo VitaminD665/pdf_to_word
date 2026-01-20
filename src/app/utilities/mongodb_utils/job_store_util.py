@@ -1,4 +1,4 @@
-""" Wrapper for storing jobs to db"""
+""" Wrapper for storing jobs to mongodb"""
 
 
 from dataclasses import dataclass
