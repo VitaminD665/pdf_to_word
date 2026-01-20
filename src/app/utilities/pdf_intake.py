@@ -17,7 +17,7 @@ class PDFValidationConfig:
     require_pdf_magic: bool = True
 
     def __post_init__(self):
-        if self.max_pdf_size_bytes != (25 * 1024 * 1024) or not isinstance(int):
+        if self.max_pdf_size_bytes != (25 * 1024 * 1024) or not isinstance(self.max_pdf_size_bytes, int):
             raise RuntimeError(f"PDF Size Bytes Incorrect. {self.max_pdf_size_bytes} is not 25 MB")
 
 
