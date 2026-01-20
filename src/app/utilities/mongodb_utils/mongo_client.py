@@ -61,7 +61,7 @@ class MongoStore:
 
             cls._client = MongoClient(
                 cls._cfg.uri,
-                serverSelectionTimeoutMS=5000,
+                serverSelectionTimeoutMS=20000,
             )
         return cls._client
 
