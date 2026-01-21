@@ -89,7 +89,7 @@ jobs:
             --cpu 2 \
             --timeout 300
 
-      # For MVP right now, since I use /tmp, we can only really have one-instance at a time
+          # For MVP right now, since I use /tmp, we can only really have one-instance at a time
           gcloud run services update "${{ env.GCR_SERVICE_NAME }}" \
             --platform managed \
             --region "${{ env.REGION_ID }}" \
